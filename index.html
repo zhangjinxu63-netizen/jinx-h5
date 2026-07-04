@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#f3f6f8" />
+  <meta name="description" content="指数温度计：用估值百分位观察主线资产、中国策略指数、黄金与 BTC 的周期位置。" />
+  <title>指数温度计｜公众号 H5</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section class="hero-card">
+      <div class="hero-kicker">GLOBAL VALUATION</div>
+      <div class="hero-row">
+        <div>
+          <h1>指数温度计</h1>
+          <p>把估值百分位，变成一眼能懂的资产温度。</p>
+        </div>
+        <span id="liveBadge" class="live-badge">BTC 更新中</span>
+      </div>
+    </section>
+
+    <nav id="marketTabs" class="market-tabs" aria-label="资产分类"></nav>
+
+    <section class="focus-card">
+      <div class="focus-top">
+        <div>
+          <span id="focusRegion" class="focus-region">主线资产池</span>
+          <h2 id="focusName">沪深300</h2>
+          <p id="focusCode">SH000300 · 中国核心大盘资产</p>
+        </div>
+        <span id="focusTag" class="source-tag direct-tag">指数估值</span>
+      </div>
+
+      <div class="metric-row">
+        <div><span id="metricLabel1">PE</span><strong id="focusPe">—</strong></div>
+        <div><span id="metricLabel2">PB</span><strong id="focusPb">—</strong></div>
+        <div><span id="metricLabel3">股息率</span><strong id="focusYield">—</strong></div>
+      </div>
+
+      <div class="temperature-head">
+        <span id="temperatureTitle">PE 估值温度</span>
+        <strong><b id="focusTemp">50</b>° · <em id="tempLabel">中性</em></strong>
+      </div>
+      <div class="temperature-track"><i id="tempMarker"></i></div>
+      <div class="temperature-scale"><span>冷</span><span>中性</span><span>热</span></div>
+
+      <div class="chart-head">
+        <span id="chartTitle">月度估值蜡烛</span>
+        <div class="period-switch">
+          <button data-years="5" class="active">5年</button>
+          <button data-years="10">10年</button>
+        </div>
+      </div>
+      <div id="candleViewport" class="candle-viewport" title="按住并左右拖动">
+        <svg id="candleChart" height="118" role="img" aria-label="可平移的估值蜡烛图"></svg>
+      </div>
+      <div class="drag-tip">← 按住图表左右拖动 →</div>
+    </section>
+
+    <section class="section-block">
+      <div class="list-head">
+        <div>
+          <h3 id="listTitle">核心指数</h3>
+          <p id="listCaption">主线资产池</p>
+        </div>
+      </div>
+      <div id="groupList" class="group-list"></div>
+    </section>
+
+    <section class="notice-card">
+      <span>i</span>
+      <p>估值温度是历史百分位展示，用于观察周期位置，不构成投资建议。正式上线建议接入你自己的 HTTPS 数据接口。</p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
