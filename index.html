@@ -47,14 +47,14 @@
       <div class="temperature-scale"><span>冷</span><span>中性</span><span>热</span></div>
 
       <div class="chart-head">
-        <span id="chartTitle">月度估值蜡烛</span>
+        <span id="chartTitle">平滑估值趋势</span>
         <div class="period-switch">
           <button data-years="5" class="active">5年</button>
           <button data-years="10">10年</button>
         </div>
       </div>
       <div id="candleViewport" class="candle-viewport" title="按住并左右拖动">
-        <svg id="candleChart" height="118" role="img" aria-label="可平移的估值蜡烛图"></svg>
+        <svg id="candleChart" height="118" role="img" aria-label="可平移的平滑估值折线图"></svg>
       </div>
       <div class="drag-tip">← 按住图表左右拖动 →</div>
     </section>
@@ -78,4 +78,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-
