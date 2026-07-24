@@ -283,8 +283,15 @@ button { font: inherit; -webkit-tap-highlight-color: transparent; }
 .candle-viewport.grabbing { cursor: grabbing; }
 .candle-viewport svg { display: block; }
 .candle-grid { stroke: rgba(255, 255, 255, .08); stroke-width: 1; }
-.candle-up { stroke: #ff836f; fill: #ff836f; }
-.candle-down { stroke: #51e0b9; fill: #51e0b9; }
+.trend-area { fill: url(#trendGradient); }
+.trend-line {
+  fill: none;
+  stroke: #51e0b9;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 3px 6px rgba(81, 224, 185, .22));
+}
 
 .drag-tip {
   text-align: center;
@@ -435,4 +442,3 @@ button { font: inherit; -webkit-tap-highlight-color: transparent; }
     box-shadow: 0 32px 90px rgba(0, 0, 0, .35);
   }
 }
-
