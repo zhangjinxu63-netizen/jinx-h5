@@ -14,7 +14,7 @@ const defaultData = {
       {
         name: "另类投资",
         items: [
-          { name: "黄金", code: "GC=F · COMEX 黄金期货", pe: "$2,330", pb: "1.12×", dy: "—", temp: 63, direct: true, gold: true, label1: "价格", label2: "200周均线倍数", label3: "股息率", valueLabel: "价格" },
+          { name: "黄金", code: "XAU/USD · 国际现货金（美元/盎司）", pe: "$—", pb: "1.12×", dy: "—", temp: 63, direct: true, gold: true, label1: "现货价格", label2: "200周均线倍数", label3: "计价单位", valueLabel: "USD/oz" },
           { name: "BTC", code: "BTC-USD · 实时 + 链上估值", pe: "$—", pb: "—", dy: "—", temp: 50, direct: true, crypto: true, label1: "实时价格", label2: "200周均线倍数", label3: "NVT Signal", valueLabel: "BTC-USD" }
         ]
       }
@@ -77,7 +77,7 @@ document.querySelectorAll("[data-years]").forEach(button => {
   button.addEventListener("click", () => {
     currentYears = Number(button.dataset.years)
     document.querySelectorAll("[data-years]").forEach(item => item.classList.toggle("active", item === button))
-    drawCandles()
+    drawLineChart()
   })
 })
 
@@ -111,7 +111,7 @@ function render() {
   document.querySelector("#metricLabel2").textContent = item.label2 || "PB"
   document.querySelector("#metricLabel3").textContent = item.label3 || "股息率"
   document.querySelector("#temperatureTitle").textContent = item.crypto ? "BTC 综合估值温度" : item.gold ? "黄金周期温度" : "PE 估值温度"
-  document.querySelector("#chartTitle").textContent = item.crypto || item.gold ? "月度价格蜡烛" : "月度估值蜡烛"
+  document.querySelector("#chartTitle").textContent = item.crypto || item.gold ? "平滑价格趋势" : "平滑估值趋势"
 
   const tag = document.querySelector("#focusTag")
   tag.textContent = item.crypto ? "实时行情" : item.gold ? "周期温度" : item.direct ? "指数估值" : "待接入"
@@ -142,10 +142,10 @@ function render() {
     groupList.appendChild(list)
   })
 
-  drawCandles()
+  drawLineChart()
 }
 
-function drawCandles() {
+function drawLineChart() {
   const item = flatItems(markets[currentMarket])[currentIndex]
   const count = currentYears * 12
   const step = 10
@@ -156,33 +156,30 @@ function drawCandles() {
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`)
 
   const seed = currentIndex + marketNames.indexOf(currentMarket) * 11 + 5
-  let values = item.candles ? item.candles.slice(-count) : []
+  let values = item.lineValues ? item.lineValues.slice(-count) : []
   let last = item.crypto ? 58 : item.gold ? 54 : 50 + seed
 
   if (!values.length) {
     for (let i = 0; i < count; i += 1) {
-      const open = last
-      const close = open + Math.sin((i + seed) * .71) * 2.7 + (((i * 11 + seed) % 7) - 3) * .45
-      const high = Math.max(open, close) + 1.3 + ((i + seed) % 4) * .35
-      const low = Math.min(open, close) - 1.2 - ((i * 3 + seed) % 4) * .3
-      values.push({ open, close, high, low })
-      last = close
+      last = Math.max(5, last + Math.sin((i + seed) * .42) * 1.45 + (((i * 11 + seed) % 7) - 3) * .22)
+      values.push(last)
     }
   }
 
-  const all = values.flatMap(row => [row.high, row.low])
-  const min = Math.min(...all)
-  const max = Math.max(...all)
+  const min = Math.min(...values)
+  const max = Math.max(...values)
   const y = value => 9 + (max - value) / (max - min || 1) * 94
-  let html = `<line class="candle-grid" x1="0" y1="32" x2="${width}" y2="32"/><line class="candle-grid" x1="0" y1="62" x2="${width}" y2="62"/><line class="candle-grid" x1="0" y1="92" x2="${width}" y2="92"/>`
-
-  values.forEach((row, index) => {
-    const x = 16 + index * step
-    const cls = row.close >= row.open ? "candle-up" : "candle-down"
-    const top = Math.min(y(row.open), y(row.close))
-    const body = Math.max(1.8, Math.abs(y(row.open) - y(row.close)))
-    html += `<line class="${cls}" x1="${x}" y1="${y(row.high)}" x2="${x}" y2="${y(row.low)}"/><rect class="${cls}" x="${x - 3}" y="${top}" width="6" height="${body}" rx="1"/>`
-  })
+  const points = values.map((value, index) => ({ x: 16 + index * step, y: y(value) }))
+  let path = points.length ? `M ${points[0].x} ${points[0].y}` : ""
+  for (let i = 1; i < points.length; i += 1) {
+    const previous = points[i - 1]
+    const current = points[i]
+    const midX = (previous.x + current.x) / 2
+    path += ` Q ${midX} ${previous.y}, ${current.x} ${current.y}`
+  }
+  const lastPoint = points[points.length - 1] || { x: 0, y: height - 8 }
+  const area = `${path} L ${lastPoint.x} ${height - 8} L ${points[0]?.x || 0} ${height - 8} Z`
+  let html = `<defs><linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#51e0b9" stop-opacity=".28"/><stop offset="100%" stop-color="#51e0b9" stop-opacity=".01"/></linearGradient></defs><line class="candle-grid" x1="0" y1="32" x2="${width}" y2="32"/><line class="candle-grid" x1="0" y1="62" x2="${width}" y2="62"/><line class="candle-grid" x1="0" y1="92" x2="${width}" y2="92"/><path class="trend-area" d="${area}"/><path class="trend-line" d="${path}"/>`
 
   svg.innerHTML = html
   requestAnimationFrame(() => {
@@ -230,6 +227,21 @@ async function refreshBtcPrice() {
   }
 }
 
+async function refreshGoldPrice() {
+  try {
+    const response = await fetch(`https://xaus.com/api/v1/spot?compact=1&fresh=${Date.now()}`)
+    const payload = await response.json()
+    const gold = findRawItem(row => row.gold)
+    if (!gold || !payload.spot_usd_oz) return
+    gold.pe = `$${Number(payload.spot_usd_oz).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    if (flatItems(markets[currentMarket])[currentIndex].gold) render()
+  } catch (_) {
+    // 保留最近一次成功值，避免接口短暂波动导致页面跳空。
+  }
+}
+
 refreshBtcPrice()
+refreshGoldPrice()
 setInterval(refreshBtcPrice, 15000)
+setInterval(refreshGoldPrice, 60000)
 render()
